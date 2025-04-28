@@ -1,0 +1,94 @@
+Project: AI Model Evaluation Framework
+
+Overview:
+This project is a framework for evaluating and comparing different AI language models' responses to various prompts, with a focus on researcher identity verification and web search capabilities.
+
+Core Features:
+1. Model Integration
+   - Supports multiple AI providers:
+     * OpenAI (GPT models)
+     * Anthropic (Claude)
+     * Google (Gemini)
+     * X.AI (Grok)
+     * Perplexity (Sonar) - Web-search only mode
+   - Each model implementation includes:
+     * Web search capability when available
+     * Metadata extraction
+     * Error handling
+     * Response formatting
+     * Full API response capture
+
+2. Prompt Management
+   - Template-based prompt generation (Jinja2)
+   - Two types of prompts:
+     * No-search: Internal knowledge only
+     * Web-search: Allows web search capabilities
+   - Customizable variables:
+     * Job variants (e.g., "accessibility researcher", "AI auditing researcher")
+     * Name variants (e.g., "Ricardo Penuela", "Ricardo Enrique Gonzalez Penuela")
+   - Support for randomized prompt generation from Google Sheets
+
+3. Flexible Execution
+   - Interactive model selection:
+     * By number (e.g., "123")
+     * By provider (e.g., "openai", "gemini")
+     * "all" for all models
+   - Interactive prompt selection:
+     * By number (e.g., "123")
+     * By mode ("web-search" or "no-search")
+     * "all" for all prompts
+   - Command-line support for both model and prompt selection
+
+4. Results Management
+   - CSV output with comprehensive data:
+     * Model responses
+     * Metadata
+     * API responses
+     * Prompt variants
+     * Job and name variants
+   - Results include:
+     * Full response text
+     * Model-specific metadata
+     * Search results (when applicable)
+     * Error information (if any)
+   - Detailed API logging:
+     * JSON-based logging of all API calls
+     * Timestamps for each interaction
+     * Complete request and response data
+     * Automatic serialization of complex objects
+     * Persistent storage in api_calls.json
+
+5. Response Analysis
+   - Integrated refusal detection:
+     * Uses Minos-v1 model for classification
+     * Binary classification (Refusal/Non-refusal)
+     * Confidence scores for each prediction
+     * Real-time analysis during model execution
+
+6. Additional Tools
+   - Refusal detection system using Minos-v1 model
+   - Random prompt generation from Google Sheets data
+   - Configurable model parameters via YAML files
+
+Configuration:
+- Models configured in YAML files:
+  * paid_models.yml: Production models with API keys
+  * models.yml: Additional model configurations
+- Prompt templates in prompts/ directory
+- CSV files for prompt permutations and results
+- API logs stored in utils/api_calls.json
+
+Usage:
+1. Basic execution:
+   python run_models.py
+
+2. Specific model selection:
+   python run_models.py 12 web-search
+
+3. All models with specific prompts:
+   python run_models.py all 123
+
+4. Provider-specific:
+   python run_models.py gemini web-search
+
+Note: The project is designed to be extensible, allowing easy addition of new models, prompt types, and evaluation metrics. 

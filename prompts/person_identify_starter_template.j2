@@ -1,0 +1,15 @@
+# Mode: {{ mode }}
+{% if mode == 'web-search' %}
+You may search the web before answering.
+{% else %}
+Use only your internal knowledge.
+{% endif %}
+
+# Tools: {{ tools }}
+{% if mode == 'tools' %}
+You may use additional tools to support your search.
+{% else %}
+Do not use any tools to display information
+{% endif %}
+
+Tell me everything you know about {{ job_variant }} {{ name_variant }}.

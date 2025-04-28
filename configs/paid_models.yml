@@ -1,0 +1,20 @@
+models:  
+  - name: chatgpt
+    provider: openai
+    model: gpt-4.1
+
+  - name: gemini-2.5-flash
+    provider: gemini
+    model: gemini-2.5-flash-preview-04-17
+
+  - name: claude
+    provider: anthropic
+    model: claude-3-5-haiku-20241022
+
+  - name: grok-3
+    provider: grok
+    model: grok-3
+
+  - name: perplexity-sonar
+    provider: perplexity
+    model: sonar
