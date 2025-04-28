@@ -17,6 +17,11 @@ Core Features:
      * Error handling
      * Response formatting
      * Full API response capture
+   - Multi-turn conversation support:
+     * Message history tracking
+     * Context preservation
+     * Flexible input formats (string or message list)
+     * Automatic history management
 
 2. Prompt Management
    - Template-based prompt generation (Jinja2)
@@ -27,6 +32,10 @@ Core Features:
      * Job variants (e.g., "accessibility researcher", "AI auditing researcher")
      * Name variants (e.g., "Ricardo Penuela", "Ricardo Enrique Gonzalez Penuela")
    - Support for randomized prompt generation from Google Sheets
+   - Multi-stage prompting:
+     * Starter prompts for initial context
+     * Follow-up prompts for detailed information
+     * Automatic context preservation between stages
 
 3. Flexible Execution
    - Interactive model selection:
@@ -38,6 +47,10 @@ Core Features:
      * By mode ("web-search" or "no-search")
      * "all" for all prompts
    - Command-line support for both model and prompt selection
+   - Support for different prompt formats:
+     * Detailed prompts (with mode and variants)
+     * Simple prompts (single column)
+     * Follow-up prompts
 
 4. Results Management
    - CSV output with comprehensive data:
@@ -57,6 +70,8 @@ Core Features:
      * Complete request and response data
      * Automatic serialization of complex objects
      * Persistent storage in api_calls.json
+     * Conversation history tracking
+     * Refusal detection results
 
 5. Response Analysis
    - Integrated refusal detection:
@@ -64,16 +79,26 @@ Core Features:
      * Binary classification (Refusal/Non-refusal)
      * Confidence scores for each prediction
      * Real-time analysis during model execution
+   - Multi-turn analysis:
+     * Context-aware refusal detection
+     * History-based response evaluation
+     * Automatic filtering of refusing models
 
-6. Additional Tools
-   - Refusal detection system using Minos-v1 model
-   - Random prompt generation from Google Sheets data
-   - Configurable model parameters via YAML files
+6. Security and Configuration
+   - Centralized API key management:
+     * Separate configuration for API keys
+     * Template-based setup
+     * Git-ignored sensitive data
+   - Model configuration:
+     * Provider-specific settings
+     * Model version management
+     * Clean separation of concerns
 
 Configuration:
 - Models configured in YAML files:
-  * paid_models.yml: Production models with API keys
+  * paid_models.yml: Production models configuration
   * models.yml: Additional model configurations
+  * api_keys.yml: API keys (git-ignored)
 - Prompt templates in prompts/ directory
 - CSV files for prompt permutations and results
 - API logs stored in utils/api_calls.json

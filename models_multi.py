@@ -6,7 +6,7 @@ from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
 import requests
 import yaml
 from pathlib import Path
-from typing import Union, List, Tuple, Dict
+from typing import Union, List, Dict, Tuple
 
 
 def load_api_keys():
@@ -14,10 +14,9 @@ def load_api_keys():
     api_keys_path = Path(__file__).parent / "configs" / "api_keys.yml"
     if not api_keys_path.exists():
         raise FileNotFoundError(
-            "api_keys.yml not found. Please add api_keys.yml to \configs "
+            "api_keys.yml not found. Please add api_keys.yml to configs "
             "and fill in your API keys."
         )
-    
     with open(api_keys_path) as f:
         return yaml.safe_load(f)
 
@@ -28,46 +27,75 @@ API_KEYS = load_api_keys()
 class BaseModel:
     def __init__(self, name: str):
         self.name = name
-    def generate(self, prompt: str) -> tuple[str, dict]:
-        """Generate a response to a prompt.
-        
-        Returns:
-            tuple[str, dict]: The generated text and metadata/annotations
+
+    def generate(
+        self,
+        prompt_or_messages: Union[str, List[Dict[str, str]]],
+        mode: str
+    ) -> Tuple[str, Dict, Dict, List[Dict[str, str]]]:
         """
+        Accept either a prompt string or a message-history list.
+        Normalize to a messages list, call _call_model, then append the assistant response.
+        Returns: text, metadata, raw_response, updated_messages
+        """
+        # Normalize input
+        if isinstance(prompt_or_messages, str):
+            messages: List[Dict[str, str]] = [{"role": "user", "content": prompt_or_messages}]
+        else:
+            # copy so we don’t mutate the caller’s list
+            messages = list(prompt_or_messages)
+
+        # Call the provider-specific implementation
+        text, metadata, raw = self._call_model(messages, mode)
+
+        # Append assistant turn to history
+        messages.append({"role": "assistant", "content": text})
+
+        return text, metadata, raw, messages
+
+    def _call_model(
+        self,
+        messages: List[Dict[str, str]],
+        mode: str
+    ) -> Tuple[str, Dict, Dict]:
         raise NotImplementedError
 
+# OpenAI implementation
 class OpenAIModel(BaseModel):
-    def __init__(self, name, model):
+    def __init__(self, name: str, model: str):
         super().__init__(name)
         openai.api_key = API_KEYS["openai"]["api_key"]
         self.model = model
 
-    def generate(self, prompt: str, mode: str) -> tuple[str, dict, dict]:
-        # instantiate the XAI-compatible OpenAI client
+    def _call_model(
+        self,
+        messages: List[Dict[str, str]],
+        mode: str
+    ) -> Tuple[str, Dict, Dict]:
         client = OpenAI()
-
-        # base args for every call
-        params = {
+        params: Dict[str, object] = {
             "model": self.model,
-            "input": prompt,
-            "temperature": 0.3,
+            # `input` accepts a list of message dicts for multi-turn
+            "input": messages,
+            "temperature": 0.2,
             "user": "1"
         }
-
-        # only include the web-search tool if mode == "web-search"
+        # include web-search tool if requested
         if mode == "web-search":
             params["tools"] = [{"type": "web_search_preview"}]
 
-        response = client.responses.create(**params)
-        
-        # Extract annotations if available
-        metadata = response.output
-        
-        if hasattr(response, 'output') and hasattr(response.output, 'content'):
-            annotations = response[1].content[0].annotations
-        
-        return response.output_text, metadata, response
 
+        ## Alter prompt with extra content for starter prompt for testing
+        #params["input"][0]['content'] = params["input"][0]['content'] + "from Cornell University" 
+        ## Check information being sent.
+        print(params)
+        response = client.responses.create(**params)
+        # extract output text and metadata
+        text = response.output_text
+        metadata = getattr(response, "output", {})
+        return text, metadata, response
+
+# Other model classes remain unchanged below
 class AnthropicModel(BaseModel):
     def __init__(self, name, model):
         super().__init__(name)
@@ -82,18 +110,12 @@ class AnthropicModel(BaseModel):
             max_tokens_to_sample=1024,
             temperature=0.0
         )
-        
-        # Extract any available metadata
-        metadata = {}
-        if hasattr(resp, 'metadata'):
-            metadata = resp.metadata
-            
+        metadata = getattr(resp, 'metadata', {})
         return resp.completion.strip(), metadata, resp
 
 class GeminiModel(BaseModel):
     def __init__(self, name, model):
         super().__init__(name)
-        
         self.client = genai.Client(api_key=API_KEYS["gemini"]["api_key"])
         self.model  = model
 
@@ -101,7 +123,6 @@ class GeminiModel(BaseModel):
         tools = []
         if mode == "web-search":
             tools = [Tool(google_search=GoogleSearch())]
-
         response = self.client.models.generate_content(
             model=self.model,
             contents=prompt,
@@ -110,22 +131,15 @@ class GeminiModel(BaseModel):
                 response_modalities=["TEXT"],
             )
         )
-        
-        # Extract text from response
         text = "".join(part.text for part in response.candidates[0].content.parts)
-        
-        # Extract grounding metadata if available
         metadata = {}
-        if hasattr(response.candidates[0], 'grounding_metadata') and \
-           hasattr(response.candidates[0].grounding_metadata, 'search_entry_point'):
+        if hasattr(response.candidates[0], 'grounding_metadata') and hasattr(response.candidates[0].grounding_metadata, 'search_entry_point'):
             metadata['search_content'] = response.candidates
-        
         return text, metadata , response
 
 class GrokModel(BaseModel):
     def __init__(self, name, model):
         super().__init__(name)
-        # use the OpenAI-compatible XAI client
         self.client = OpenAI(
             api_key=API_KEYS["grok"]["api_key"],
             base_url="https://api.x.ai/v1"
@@ -134,7 +148,6 @@ class GrokModel(BaseModel):
 
     def generate(self, prompt: str, mode: str) -> tuple[str, dict, dict]:
         messages = [
-            {"role": "system", "content": "You are a PhD-level researcher."},
             {"role": "user",   "content": prompt}
         ]
         kwargs = {
@@ -143,22 +156,13 @@ class GrokModel(BaseModel):
             "max_tokens":  1024,
             "temperature": 0.0
         }
-        if mode == "web-search":
-            # x.ai/grok currently does not support external tools,
-            # but if it did, you could add e.g.:
-            # kwargs["tools"] = [{"type": "web_search_preview"}]
-            pass
-
         completion = self.client.chat.completions.create(**kwargs)
-        
-        # Extract metadata if available
         metadata = {}
         if hasattr(completion, 'model') or hasattr(completion, 'system_fingerprint'):
             metadata = {
                 'model': getattr(completion, 'model', None),
                 'system_fingerprint': getattr(completion, 'system_fingerprint', None)
             }
-            
         return completion.choices[0].message.content.strip(), metadata, completion
 
 class PerplexityModel(BaseModel):
@@ -171,43 +175,20 @@ class PerplexityModel(BaseModel):
     def generate(self, prompt: str, mode: str) -> tuple[str, dict, dict]:
         if mode != "web-search":
             return "Perplexity model only works in web-search mode", {}, {}
-        
-
-        ## Do not add any system prompt, we want to have similar conditions for all models that mimic user usage.
         payload = {
             "model": self.model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
+            "messages": [{"role": "user", "content": prompt}]
         }
-        
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
         try:
-            response = requests.post(self.url, json=payload, headers=headers)
-            response.raise_for_status()
-            response_data = response.json()
-            
-            # Extract text from response
-            text = response_data.get('choices', [{}])[0].get('message', {}).get('content', '')
-            
-            # Extract metadata
-            metadata = {
-                'model': response_data.get('model'),
-                'usage': response_data.get('usage'),
-                'id': response_data.get('id')
-            }
-            
-            return text, metadata, response_data
-            
+            resp = requests.post(self.url, json=payload, headers=headers)
+            resp.raise_for_status()
+            data = resp.json()
+            text = data.get('choices', [{}])[0].get('message', {}).get('content', '')
+            metadata = {'model': data.get('model'), 'usage': data.get('usage'), 'id': data.get('id')}
+            return text, metadata, data
         except Exception as e:
-            return f"[ERROR] {str(e)}", {}, {}
+            return f"[ERROR] {e}", {}, {}
 
 def create_models(model_configs):
     models = {}
@@ -225,4 +206,4 @@ def create_models(model_configs):
             models[name] = PerplexityModel(name, cfg["model"])
         else:
             raise ValueError(f"Unknown provider: {prov}")
-    return models 
+    return models

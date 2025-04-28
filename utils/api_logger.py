@@ -31,7 +31,8 @@ def log_api_call(
     prompt: str,
     response_text: str,
     metadata: dict,
-    raw_response: object
+    raw_response: object,
+    history: list
 ):
     """Append one record to a JSON array on disk."""
     record = {
@@ -44,6 +45,7 @@ def log_api_call(
         "response_text": response_text,
         "metadata":      _serialize(metadata),
         "raw_response":  _serialize(raw_response),
+        "history":       _serialize(history),
     }
 
     # load existing array (or start fresh)
