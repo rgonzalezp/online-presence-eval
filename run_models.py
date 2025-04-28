@@ -5,7 +5,7 @@ from models import create_models
 from utils.api_logger import log_api_call
 from utils.refusal_detector import detect_refusal, _MODEL as _REFUSAL_MODEL
 
-def load_prompts(file_path="prompt_permutations_fixed_eval.csv"):
+def load_prompts(file_path="prompts/identify_person_starter_prompts_fixed_eval.csv"):
     """Load prompts from a CSV file."""
     return pd.read_csv(file_path)
 
