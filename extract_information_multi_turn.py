@@ -5,6 +5,7 @@ from datetime import datetime
 from models_multi import create_models
 from utils.api_logger import log_api_call
 from utils.refusal_detector import detect_refusal, _MODEL as _REFUSAL_MODEL
+import os
 
 
 def load_followup_prompts(file_path="data/overview_prompts_adjusted.csv"):
@@ -185,9 +186,15 @@ def run_models(models, prompts_df, selection=None, histories=None):
 
 
 def save_results(results, file_path="registered_responses.csv"):
+    # ensure the experiments directory exists
+    os.makedirs("data/experiments", exist_ok=True)
+
+    # prefix the file path so it goes under data/experiments
+    full_path = os.path.join("data", "experiments", file_path)
+
     df = pd.DataFrame(results)
-    df.to_csv(file_path, index=False)
-    print(f"✅ All responses saved to {file_path}")
+    df.to_csv(full_path , index=False)
+    print(f"✅ All responses saved to {full_path }")
 
 
 def main(model_selection=None, prompt_selection=None):
