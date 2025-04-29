@@ -99,19 +99,33 @@ class OpenAIModel(BaseModel):
 class AnthropicModel(BaseModel):
     def __init__(self, name, model):
         super().__init__(name)
-        anthropic.api_key = API_KEYS["anthropic"]["api_key"]
-        self.client = anthropic.Client()
+        
+        self.client = anthropic.Anthropic( api_key = API_KEYS["anthropic"]["api_key"])
         self.model  = model
 
-    def generate(self, prompt, mode=None) -> tuple[str, dict, dict]:
-        resp = self.client.completions.create(
+    def _call_model(
+        self,
+        messages: List[Dict[str, str]],
+        mode: str
+    ) -> Tuple[str, Dict, Dict]:
+        resp = self.client.messages.create(
             model=self.model,
-            prompt=anthropic.HUMAN_PROMPT + prompt + anthropic.AI_PROMPT,
-            max_tokens_to_sample=1024,
+            messages=messages,
+            max_tokens=1024,
             temperature=0.1115
         )
-        metadata = getattr(resp, 'metadata', {})
-        return resp.completion.strip(), metadata, resp
+        metadata = {
+            "model":     getattr(resp, "model", None),
+            "usage":     getattr(resp, "usage", {}),
+            "id":        getattr(resp, "id", None),
+        }
+
+        text = "".join(
+            block.text for block in resp.content
+            if getattr(block, "type", None) == "text"
+        ).strip()
+
+        return text, metadata, resp
 
 class GeminiModel(BaseModel):
     def __init__(self, name, model):
@@ -185,24 +199,29 @@ class GrokModel(BaseModel):
         )
         self.model  = model
 
-    def generate(self, prompt: str, mode: str) -> tuple[str, dict, dict]:
-        messages = [
-            {"role": "user",   "content": prompt}
-        ]
+    def _call_model(
+        self,
+        messages: List[Dict[str, str]],
+        mode: str
+    ) -> Tuple[str, Dict, Dict]:
+
         kwargs = {
             "model":       self.model,
-            "messages":    messages,
+            "messages":    messages,        # full chat history
+            "temperature": 0.1115,
             "max_tokens":  1024,
-            "temperature": 0.1115
         }
-        completion = self.client.chat.completions.create(**kwargs)
-        metadata = {}
-        if hasattr(completion, 'model') or hasattr(completion, 'system_fingerprint'):
-            metadata = {
-                'model': getattr(completion, 'model', None),
-                'system_fingerprint': getattr(completion, 'system_fingerprint', None)
-            }
-        return completion.choices[0].message.content.strip(), metadata, completion
+        # (Grok doesn’t expose web-search yet; add tool args here when it does)
+
+        resp = self.client.chat.completions.create(**kwargs)
+
+        text = resp.choices[0].message.content.strip()
+        metadata = {
+            "model":              getattr(resp, "model", None),
+            "system_fingerprint": getattr(resp, "system_fingerprint", None),
+            "usage":              getattr(resp, "usage", {}),
+        }
+        return text, metadata, resp
 
 class PerplexityModel(BaseModel):
     def __init__(self, name, model):
@@ -249,10 +268,11 @@ class OpenRouterModel(BaseModel):
         mode: str
     ) -> Tuple[str, Dict, Dict]:
         
-        plugins = [{ "id": "web" }] if mode == "web-search" else None
+        needs_online = mode == "web-search" or len(messages) > 1
+        model_name   = f"{self.model}:online" if needs_online else self.model
 
         resp = self.client.chat.completions.create(
-            model=self.model + ":online",          
+            model= model_name,          
             messages=messages,
             temperature=0.1115,
             max_tokens=1024,

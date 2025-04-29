@@ -1,16 +1,17 @@
-Project: AI Model Evaluation Framework
+## Project: AI Model Evaluation Framework (updated 29 Apr 2025)
 
-Overview:
-This project is a framework for evaluating and comparing different AI language models' responses to various prompts, with a focus on researcher identity verification and web search capabilities.
+### Overview:
+A research-grade framework for evaluating and comparing the behaviour of large-language-model (LLM) APIs on identity-verification prompts and follow-up questions. Supports direct SDKs and a unified OpenRouter path.
 
-Core Features:
-1. Model Integration
-   - Supports multiple AI providers:
+### Core Features:
+1. **Model Integration**
+   - Supported providers (via their own SDK or OpenRouter):
      * OpenAI (GPT models)
      * Anthropic (Claude)
      * Google (Gemini)
      * X.AI (Grok)
      * Perplexity (Sonar) - Web-search only mode
+     * DeepSeekV3 - Through OpenRouter (free)
    - Each model implementation includes:
      * Web search capability when available
      * Metadata extraction
@@ -23,7 +24,7 @@ Core Features:
      * Flexible input formats (string or message list)
      * Automatic history management
 
-2. Prompt Management
+2. **Prompt Management**
    - Template-based prompt generation (Jinja2)
    - Two types of prompts:
      * No-search: Internal knowledge only
@@ -37,7 +38,7 @@ Core Features:
      * Follow-up prompts for detailed information
      * Automatic context preservation between stages
 
-3. Flexible Execution
+3. **Flexible Execution**
    - Interactive model selection:
      * By number (e.g., "123")
      * By provider (e.g., "openai", "gemini")
@@ -52,13 +53,13 @@ Core Features:
      * Simple prompts (single column)
      * Follow-up prompts
 
-4. Results Management
+4. **Results Management**
    - CSV output with comprehensive data:
      * Model responses
      * Metadata
+     * Prompt used
      * API responses
-     * Prompt variants
-     * Job and name variants
+     * refusal scores
    - Results include:
      * Full response text
      * Model-specific metadata
@@ -73,18 +74,15 @@ Core Features:
      * Conversation history tracking
      * Refusal detection results
 
-5. Response Analysis
+5. **Response Analysis**
    - Integrated refusal detection:
      * Uses Minos-v1 model for classification
      * Binary classification (Refusal/Non-refusal)
      * Confidence scores for each prediction
      * Real-time analysis during model execution
-   - Multi-turn analysis:
-     * Context-aware refusal detection
-     * History-based response evaluation
-     * Automatic filtering of refusing models
+     * Filters refusing models before follow‑ups.
 
-6. Security and Configuration
+6. **Security & Configuration**
    - Centralized API key management:
      * Separate configuration for API keys
      * Template-based setup
@@ -94,26 +92,27 @@ Core Features:
      * Model version management
      * Clean separation of concerns
 
-Configuration:
-- Models configured in YAML files:
-  * paid_models.yml: Production models configuration
-  * models.yml: Additional model configurations
-  * api_keys.yml: API keys (git-ignored)
-- Prompt templates in prompts/ directory
-- CSV files for prompt permutations and results
-- API logs stored in utils/api_calls.json
 
-Usage:
-1. Basic execution:
-   python run_models.py
+### Configuration Quick‑look
+```
+configs/
+  paid_models.yml      # model configurations catalogue
+  api_keys.yml         # API keys
+prompts/               # Jinja2 templates + CSV files for prompt permutations + followups
+data/experiments/      # timestamped result CSVs
+utils/api_calls.json   # full request/response log
+```
 
-2. Specific model selection:
-   python run_models.py 12 web-search
+### Usage Snippets
+```bash
+# run interactive cli
+python run_models.py
 
-3. All models with specific prompts:
-   python run_models.py all 123
+# run only Gemini models on all web‑search prompts
+python run_models.py gemini web-search
 
-4. Provider-specific:
-   python run_models.py gemini web-search
+# run OpenRouter DeepSeek on prompt #3
+python run_models.py 6 3
+```
 
 Note: The project is designed to be extensible, allowing easy addition of new models, prompt types, and evaluation metrics. 

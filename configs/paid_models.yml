@@ -7,6 +7,14 @@ models:
     provider: gemini
     model: gemini-2.5-flash-preview-04-17
 
+  - name: perplexity-sonar
+    provider: perplexity
+    model: sonar
+
+  - name: deepseekv3
+    provider: openrouter
+    model: deepseek/deepseek-chat-v3-0324:free
+
   - name: claude
     provider: anthropic
     model: claude-3-5-haiku-20241022
@@ -15,10 +23,4 @@ models:
     provider: grok
     model: grok-3
 
-  - name: perplexity-sonar
-    provider: perplexity
-    model: sonar
-
-  - name: deepseekv3
-    provider: openrouter
-    model: deepseek/deepseek-chat-v3-0324:free
+  
