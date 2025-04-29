@@ -96,7 +96,6 @@ class OpenAIModel(BaseModel):
         metadata = getattr(response, "output", {})
         return text, metadata, response
 
-# Other model classes remain unchanged below
 class AnthropicModel(BaseModel):
     def __init__(self, name, model):
         super().__init__(name)
@@ -234,6 +233,39 @@ class PerplexityModel(BaseModel):
         except Exception as e:
             return f"[ERROR] {e}", {}, {}
 
+class OpenRouterModel(BaseModel):
+    """Universal wrapper for any OpenRouter model slug."""
+    def __init__(self, name: str, model: str):
+        super().__init__(name)
+        self.model = model
+        self.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=API_KEYS["openrouter"]["api_key"]
+        )
+
+    def _call_model(
+        self,
+        messages: List[Dict[str, str]],
+        mode: str
+    ) -> Tuple[str, Dict, Dict]:
+        
+        plugins = [{ "id": "web" }] if mode == "web-search" else None
+
+        resp = self.client.chat.completions.create(
+            model=self.model + ":online",          
+            messages=messages,
+            temperature=0.1115,
+            max_tokens=1024,
+        )
+        text = resp.choices[0].message.content
+        metadata = dict(
+            usage=getattr(resp, "usage", {}),
+            id=resp.id,
+            provider="openrouter"
+        )
+        return text, metadata, resp
+
+
 def create_models(model_configs):
     models = {}
     for cfg in model_configs:
@@ -248,6 +280,8 @@ def create_models(model_configs):
             models[name] = GrokModel(name, cfg["model"])
         elif prov == "perplexity":
             models[name] = PerplexityModel(name, cfg["model"])
+        elif prov == "openrouter":                        
+            models[name] = OpenRouterModel(name, cfg["model"])
         else:
             raise ValueError(f"Unknown provider: {prov}")
     return models

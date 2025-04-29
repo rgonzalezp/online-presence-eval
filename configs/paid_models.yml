@@ -18,3 +18,7 @@ models:
   - name: perplexity-sonar
     provider: perplexity
     model: sonar
+
+  - name: deepseekv3
+    provider: openrouter
+    model: deepseek/deepseek-chat-v3-0324:free
