@@ -1,7 +1,7 @@
 ## Project: AI Model Evaluation Framework (updated 29 Apr 2025)
 
 ### Overview:
-A research-grade framework for evaluating and comparing the behaviour of large-language-model (LLM) APIs on identity-verification prompts and follow-up questions. Supports direct SDKs and a unified OpenRouter path.
+The goal is to have a tool to evaluate how well these models can find information about a specific individual. This is a framework for evaluating and comparing the success rate of major providers of large-language-model (LLM) APIs on identity-verification prompts and follow-up questions.  Supports direct SDKs and a unified OpenRouter path.
 
 ### Core Features:
 1. **Model Integration**
