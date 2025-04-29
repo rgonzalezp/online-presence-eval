@@ -172,12 +172,16 @@ class PerplexityModel(BaseModel):
         self.model = model
         self.url = "https://api.perplexity.ai/chat/completions"
 
-    def generate(self, prompt: str, mode: str) -> tuple[str, dict, dict]:
-        if mode != "web-search":
+    def _call_model(
+        self,
+        messages: List[Dict[str, str]],
+        mode: str
+    ) -> Tuple[str, Dict, Dict]:
+        if mode != "web-search" and len(messages) == 1:
             return "Perplexity model only works in web-search mode", {}, {}
         payload = {
             "model": self.model,
-            "messages": [{"role": "user", "content": prompt}]
+            "messages": messages
         }
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
         try:

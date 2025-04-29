@@ -1,6 +1,7 @@
 import pandas as pd
 import yaml
 import sys
+from datetime import datetime
 from models_multi import create_models
 from utils.api_logger import log_api_call
 from utils.refusal_detector import detect_refusal, _MODEL as _REFUSAL_MODEL
@@ -120,7 +121,7 @@ def run_models(models, prompts_df, selection=None, histories=None):
     print(f"\nRunning {len(selected_prompts)} prompts through {len(selected_models)} models...")
     for _, row in selected_prompts.iterrows():
         prompt      = row['prompt']
-        # detect whether this is a “starter” (detailed) or “follow-up” (simple) prompt
+        # detect whether this is a "starter" (detailed) or "follow-up" (simple) prompt
         is_detailed = 'mode' in row and 'job_variant' in row and 'name_variant' in row
 
         prompt       = row['prompt']
@@ -206,8 +207,9 @@ def main(model_selection=None, prompt_selection=None):
                                          histories=histories)
     # save combined
     all_results = starter_results + experiment_results
-    save_results(all_results, file_path='full_experiment_results.csv')
-    print("\n✅ Driver complete — results in full_experiment_results.csv")
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    save_results(all_results, file_path= f"full_experiment_results{timestamp}.csv")
+    print(f"\n✅ Driver complete — results in full_experiment_results.csv (Generated at {timestamp})")
 
 if __name__ == '__main__':
     sel1 = ''.join(sys.argv[1:2]) if len(sys.argv)>1 else None
