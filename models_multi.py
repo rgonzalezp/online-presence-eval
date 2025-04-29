@@ -2,7 +2,7 @@ import openai
 from openai import OpenAI
 import anthropic
 from google import genai
-from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
+from google.genai.types import Content, Part, Tool, GenerateContentConfig, GoogleSearch
 import requests
 import yaml
 from pathlib import Path
@@ -77,8 +77,9 @@ class OpenAIModel(BaseModel):
             "model": self.model,
             # `input` accepts a list of message dicts for multi-turn
             "input": messages,
-            "temperature": 0.2,
-            "user": "1"
+            "temperature": 0.1115,
+            "user": "1",
+            "max_output_tokens": 1024
         }
         # include web-search tool if requested
         if mode == "web-search":
@@ -108,7 +109,7 @@ class AnthropicModel(BaseModel):
             model=self.model,
             prompt=anthropic.HUMAN_PROMPT + prompt + anthropic.AI_PROMPT,
             max_tokens_to_sample=1024,
-            temperature=0.0
+            temperature=0.1115
         )
         metadata = getattr(resp, 'metadata', {})
         return resp.completion.strip(), metadata, resp
@@ -119,16 +120,55 @@ class GeminiModel(BaseModel):
         self.client = genai.Client(api_key=API_KEYS["gemini"]["api_key"])
         self.model  = model
 
-    def generate(self, prompt: str, mode: str) -> tuple[str, dict, dict]:
+    def _call_model(
+        self,
+        messages: List[Dict[str, str]],
+        mode: str
+    ) -> Tuple[str, Dict, Dict]:
         tools = []
-        if mode == "web-search":
+
+        content_objects = []
+        for i, msg in enumerate(messages):
+            if not isinstance(msg, dict) or 'role' not in msg or 'content' not in msg:
+                print(f"Warning: Skipping invalid message format at index {i}: {msg}")
+                continue
+
+            role = 'model' if msg.get('role', 'user').lower() in ['assistant', 'model'] else 'user'
+            content_text = msg.get('content')
+
+            # Ensure content is string
+            if content_text is None:
+                 part_text = ""
+            elif not isinstance(content_text, str):
+                 part_text = str(content_text)
+            else:
+                 part_text = content_text
+
+            try:
+                 part_object = Part(text=part_text)
+                 content_object = Content(role=role, parts=[part_object])
+                 content_objects.append(content_object)
+            except NameError:
+                 # Fallback or error if Content/Part are NOT actually in google.genai.types
+                 print("ERROR: Cannot find 'Content' or 'Part' in 'google.genai.types'. "
+                       "Ensure your import path and SDK are correct.")
+                 # You might return an error or raise an exception here
+                 return "Error: SDK type mismatch", {}, None
+            except Exception as e:
+                 print(f"Error creating Content/Part object: {e}")
+                 return f"Error: SDK object creation failed ({e})", {}, None
+            
+        ## When Gemini does not have access to web search, it sticks to the conversation so far and it does not provide any information that is not available there. So for now we flag that it can always use web-search if it's asking follow-up questions. Will probably have to change this later to handle the availability of the tool or not in an easier way
+        if mode == "web-search" or len(messages) > 1:
             tools = [Tool(google_search=GoogleSearch())]
         response = self.client.models.generate_content(
             model=self.model,
-            contents=prompt,
+            contents=content_objects,
             config=GenerateContentConfig(
                 tools=tools,
                 response_modalities=["TEXT"],
+                max_output_tokens=1024,
+                temperature=0.1115
             )
         )
         text = "".join(part.text for part in response.candidates[0].content.parts)
@@ -154,7 +194,7 @@ class GrokModel(BaseModel):
             "model":       self.model,
             "messages":    messages,
             "max_tokens":  1024,
-            "temperature": 0.0
+            "temperature": 0.1115
         }
         completion = self.client.chat.completions.create(**kwargs)
         metadata = {}
