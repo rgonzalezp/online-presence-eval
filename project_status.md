@@ -11,7 +11,7 @@ The goal is to have a tool to evaluate how well these models can find informatio
      * Google (Gemini)
      * X.AI (Grok)
      * Perplexity (Sonar) - Web-search only mode
-     * DeepSeekV3 - Through OpenRouter (free)
+     * QwenV3 - Through OpenRouter (free) - Web-search is powered by Exa
    - Each model implementation includes:
      * Web search capability when available
      * Metadata extraction
@@ -36,6 +36,7 @@ The goal is to have a tool to evaluate how well these models can find informatio
    - Multi-stage prompting:
      * Starter prompts for initial context
      * Follow-up prompts for detailed information
+     * Each prompt has id, human question, list of fields
      * Automatic context preservation between stages
 
 3. **Flexible Execution**
@@ -53,7 +54,16 @@ The goal is to have a tool to evaluate how well these models can find informatio
      * Simple prompts (single column)
      * Follow-up prompts
 
-4. **Results Management**
+
+4. **Fact & Hypothesis Store**
+   - Ground‑truth facts
+     * generate_facts_json_from_google_sheets.py pulls the latest data from Google Sheets
+     * Outputs *_fact_store.json with full information (from facts sheet, by category, attribute, and value)
+   - Grading claims
+     * nli_entailment_hypotheses_generator.py + hypothesis_templates.yml turn each fact into natural‑language claims for the NLI checker
+     * Outputs *_hypotheses.json
+
+5. **Results Management**
    - CSV output with comprehensive data:
      * Model responses
      * Metadata
@@ -74,7 +84,7 @@ The goal is to have a tool to evaluate how well these models can find informatio
      * Conversation history tracking
      * Refusal detection results
 
-5. **Response Analysis**
+6. **Response Analysis**
    - Integrated refusal detection:
      * Uses Minos-v1 model for classification
      * Binary classification (Refusal/Non-refusal)
@@ -82,7 +92,7 @@ The goal is to have a tool to evaluate how well these models can find informatio
      * Real-time analysis during model execution
      * Filters refusing models before follow‑ups.
 
-6. **Security & Configuration**
+7. **Security & Configuration**
    - Centralized API key management:
      * Separate configuration for API keys
      * Template-based setup
@@ -98,7 +108,10 @@ The goal is to have a tool to evaluate how well these models can find informatio
 configs/
   paid_models.yml      # model configurations catalogue
   api_keys.yml         # API keys
-prompts/               # Jinja2 templates + CSV files for prompt permutations + followups
+prompts/               # Jinja2 templates + CSV files for starter CSV
+data/grounding/                  # follow-up YAML mapping questions to facts
+data/ricardo_*_fact_store.json   # facts derived from google spreadsheet
+data/ricardo_*_hypotheses.json   # claims for natural language inference
 data/experiments/      # timestamped result CSVs
 utils/api_calls.json   # full request/response log
 ```
@@ -113,6 +126,24 @@ python run_models.py gemini web-search
 
 # run OpenRouter DeepSeek on prompt #3
 python run_models.py 6 3
+```
+
+### Execution Flow
+``` mermaid
+graph TD
+  
+  subgraph buildMapping["Collect facts & hypotheses "]
+    direction LR
+    A[Google Sheet, filled by you] -->|generate_facts_json_from_google_sheets.py| B(Fact Store JSON)
+    B -->|nli_entailment_hypotheses_generator.py\n+ hypothesis_templates.yml| C(Hypotheses JSON)
+    ultra[ultra_specific_prompts_mapping.yml]
+  end
+  subgraph Collect-answers
+    starterCSV(Starter CSV) --> D(run_models.py)
+    ultra --> D
+    D --> E[data/experiments/run_results_*.csv]
+  end
+  
 ```
 
 Note: The project is designed to be extensible, allowing easy addition of new models, prompt types, and evaluation metrics. 

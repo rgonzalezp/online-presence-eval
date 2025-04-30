@@ -15,6 +15,37 @@ def load_followup_prompts(file_path="data/grounding/ultra_specific_prompts_mappi
 
     return prompts
 
+def select_followups_to_run(followups, selection=None):
+    """
+    Interactive selector for follow-up prompts (list of dicts).
+    * 'all'  – return entire list
+    * comma-/space-separated numbers – return those indices (1-based)
+    * otherwise treat input as an id-substring filter.
+    """
+    if not selection:
+        print("\nAvailable follow-up prompts:")
+        for i, p in enumerate(followups, 1):
+            print(f"  [{i}] {p['id']:<25} | {p['question'][:60]}…")
+        selection = input("Enter prompts to run (numbers, id substring, or 'all'): ")
+
+    sel_lower = selection.lower()
+
+    # full list
+    if sel_lower == "all":
+        return followups
+
+    # numeric picks (e.g. "1 3 5")
+    if all(tok.isdigit() for tok in sel_lower.split()):
+        idx = [int(tok) - 1 for tok in sel_lower.split()]
+        return [followups[i] for i in idx if 0 <= i < len(followups)]
+
+    # substring match on id
+    filtered = [p for p in followups if sel_lower in p["id"].lower()]
+    if filtered:
+        return filtered
+
+    print(f"Invalid follow-up selection: {selection}")
+    return []
 
 def load_starter_prompts(file_path="prompts/identify_person_starter_prompts_fixed_eval.csv"):
     """Load starter prompts from a CSV file."""
@@ -223,11 +254,12 @@ def main(model_selection=None, prompt_selection=None):
     # load and run follow-ups
 
     followups_list = load_followup_prompts() 
-    print(followups_list)
+    selected_followups = select_followups_to_run(followups_list, prompt_selection)
+    print(selected_followups)
     cont_models = {m:models[m] for m in non_refusers}
     experiment_results = []
     if cont_models:
-        experiment_results, histories = run_models(cont_models, followups_list,
+        experiment_results, histories = run_models(cont_models, selected_followups,
                                          histories=histories)
     # save combined
     all_results = starter_results + experiment_results
