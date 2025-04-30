@@ -3,7 +3,24 @@ from pathlib import Path
 from openai import OpenAI
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch, torch.nn.functional as F
+from models_multi import create_models 
 
+
+_JUDGE_MODELS = None            # type: dict[str, object]
+
+def _get_judge_model(name: str = "judge_default"):
+    """
+    Return (and cache) a model from models_multi.create_models().
+    The name must match an entry in configs/paid_models.yml.
+    """
+    global _JUDGE_MODELS
+    if _JUDGE_MODELS is None:
+        with open("configs/paid_models.yml", encoding="utf-8") as f:
+            cfgs = yaml.safe_load(f)["models"]
+        _JUDGE_MODELS = create_models(cfgs)
+    if name not in _JUDGE_MODELS:
+        raise KeyError(f"Judge-model '{name}' not found in paid_models.yml")
+    return _JUDGE_MODELS[name]
 
 # ───────────────────────────────────────────────────────── helpers ──
 def load_api_keys():
@@ -68,7 +85,12 @@ def entails(premise: str, hyp: str, thr: float = .800) -> bool:
 
 
 # ─────────────────────────────────────────────── GPT-judge prompt ──
-def llm_judge(ans: str, hyps: list[str], q: str) -> tuple[str, str]:
+def llm_judge(ans: str, hyps: list[str], q: str,
+              model_name: str = "qwenv3") -> tuple[str, str]:
+    """
+    Use the unified wrapper in models_multi to grade with an arbitrary provider.
+    Returns (one-word verdict, prompt_sent_to_llm).
+    """
     prompt = f"""
 You are grading an answer to the question:
 \"{q}\"
@@ -82,15 +104,10 @@ Model’s answer:
 Respond with one word: PASS / FAIL / UNCERTAIN
 """.strip()
 
-    openai.api_key = load_api_keys()["openai"]["api_key"]
-    client = OpenAI()
-    resp = client.responses.create(
-        model="gpt-4o-mini",
-        input=[{"role": "user", "content": prompt}],
-        temperature=0,
-        max_output_tokens=16,
-    )
-    return resp.output_text.strip().lower(), prompt
+    judge_model = _get_judge_model(model_name)
+    text, _meta, _raw, _hist = judge_model.generate(prompt, mode="no-search")
+    verdict = text.strip().split()[0].lower()        # keep first token
+    return verdict, prompt, model_name
 
 
 # ────────────────────────────────────────────── evaluate answer ──
@@ -105,19 +122,19 @@ def evaluate(prompt_id: str, ans: str, prompts: dict,
 
     # 1) auto-fail
     if "auto" in stages and auto_fail_regex(ans):
-        return "fail", "auto", "NEG+KEY"
+        return "fail", "auto", "NEG+KEY", "regex"
 
     # 2) NLI
     if "nli" in stages and all(entails(ans, h) for h in hyps):
-        return "entails", "nli", json.dumps(hyps, ensure_ascii=False)
+        return "entails", "nli", json.dumps(hyps, ensure_ascii=False), "DeBERTa"
 
     # 3) LLM
     if "llm" in stages:
-        score, prompt = llm_judge(ans, hyps, q_text)
-        return score, "llm", prompt
+        score, prompt, model_name = llm_judge(ans, hyps, q_text)
+        return score, "llm", prompt, model_name
 
     # unresolved
-    return "uncertain", "none", ""
+    return "uncertain", "none", "",""
 
 
 # ─────────────────────────────────────────── interactive picker ──
@@ -156,12 +173,13 @@ def main():
     prompts = load_prompts(args.prompts)
 
     for row in rows[1:]:  # skip header row if dataset re-included it
-        score, method, qry = evaluate(row["prompt_id"],
+        score, method, qry, model_name = evaluate(row["prompt_id"],
                                       row["response"],
                                       prompts, hypos, stages)
         row["score"]        = score
         row["judge_method"] = method
         row["judge_query"]  = qry
+        row["judge_name"]  = model_name
 
     out = args.out or Path(args.answers).with_stem(
             Path(args.answers).stem + "_scored")
