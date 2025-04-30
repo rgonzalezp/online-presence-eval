@@ -72,6 +72,10 @@
     "hypothesis": "His h-index is 7."
   },
   {
+    "field": "research_metric.top_paper_citations",
+    "hypothesis": "His top paper has 28 citations and is titled Investigating use cases of ai-powered scene description applications for blind and low vision people"
+  },
+  {
     "field": "research_metric.i10_index",
     "hypothesis": "His i10-index is 3."
   },

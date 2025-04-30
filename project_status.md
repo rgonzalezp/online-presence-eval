@@ -102,6 +102,19 @@ The goal is to have a tool to evaluate how well these models can find informatio
      * Model version management
      * Clean separation of concerns
 
+8. **Evaluation Pipeline**  ✅ *New*
+   - One-shot scorer: `evaluate.py`
+     * CLI-driven:  
+       `python evaluate.py --answers run_results.csv --facts fact_store/ricardo_gonzalez_fact_store.json --hypos ricardo_hypotheses.json --prompts prompts.yml`
+     * Accepts the **run-results CSV** (starter + follow-ups)  
+       – only needs `prompt_id` and `response` columns.
+   - Scoring logic:
+     * **Auto-fail regex** catches blatant contradictions in ⩽1 ms.
+     * **Mini MNLI** model (`DeBERTa-v3 base`) grants a *PASS* when every gold claim is entailed.
+     * **GPT-4o-mini judge** handles borderline cases with a one-word verdict (`pass / fail / uncertain`).
+   - Output:
+     * Writes `*_scored.csv` alongside the input file, adding a `score` column.
+   - Ready for batch or CI integration (scores up to 1 K answers / min on CPU).
 
 ### Configuration Quick‑look
 ```
@@ -126,6 +139,9 @@ python run_models.py gemini web-search
 
 # run OpenRouter DeepSeek on prompt #3
 python run_models.py 6 3
+
+python evaluate.py --facts data\grounding\ricardo_gonzalez_fact_store.json --hypos data\grounding\ricardo_hypotheses.json --prompts data\grounding\ultra_specific_prompts_mapping.yml --answers data\experiments\full_experiment_results2025-04-30_01-56.csv
+
 ```
 
 ### Execution Flow
