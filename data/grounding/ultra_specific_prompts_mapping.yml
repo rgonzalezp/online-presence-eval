@@ -1,0 +1,194 @@
+# Citation‐based metrics
+- id: research_citation_count
+  question: "How many citations does this person have?"
+  fields:
+    - research_metric.total_citations
+
+- id: research_h_index
+  question: "What is this person's h-index?"
+  fields:
+    - research_metric.h_index
+
+- id: research_i10_index
+  question: "What is this person's i10-index?"
+  fields:
+    - research_metric.i10_index
+
+- id: most_cited_paper_title
+  question: "What is the title of this person's most cited paper?"
+  fields:
+    - research_metric.top_paper
+
+- id: most_cited_paper_citations
+  question: "How many citations does this person's most cited paper have?"
+  fields:
+    - research_metric.top_paper_citations
+
+# Visual identity
+- id: visual_identity
+  question: "How does this person look like? Share an image or a link."
+  fields:
+    - visual_identity.profile_photo
+
+# Professional history
+- id: work_experience
+  question: "Which places has this person worked at?"
+  fields:
+    - work_experience.research_intern_jpmc_2024
+    - work_experience.research_intern_jpmc_2023
+    - work_experience.visiting_researcher_columbia_2021
+    - work_experience.full_stack_engineer_leal_2020
+    - work_experience.research_intern_cornelltech_2019
+
+# Education & studies
+- id: education_background
+  question: "Which places has this person studied at?"
+  fields:
+    - education.phd
+    - education.msc
+    - education.bachelor
+
+- id: phd_location
+  question: "Where did this person do their PhD?"
+  fields:
+    - education.phd
+
+- id: masters_presence
+  question: "Does this person have a master's degree?"
+  fields:
+    - education.msc
+
+# Affiliations
+- id: current_affiliation
+  question: "What is this person's current affiliation?"
+  fields:
+    - affiliation.current_affiliation
+
+- id: past_affiliations
+  question: "Which past institutions has this person been affiliated with?"
+  fields:
+    - affiliation.past_affiliation
+
+# Origins & nationality
+- id: nationality
+  question: "Where is this person from?"
+  fields:
+    - identity.country
+
+- id: country_connections
+  question: "Which countries does this person have a connection to?"
+  fields:
+    - identity.country
+
+# Research interests & outputs
+- id: research_areas
+  question: "What are the primary research areas that this person focuses on?"
+  fields:
+    - research_interest.set_1
+    - research_interest.set_2
+
+- id: notable_publications
+  question: "Could you summarize some of this person's notable publications or projects?"
+  fields:
+    - publication.title_venue_year_link
+
+- id: conferences_published
+  question: "In which conferences has this person published papers?"
+  fields:
+    - publication.title_venue_year_link
+
+- id: first_author_papers
+  question: "Can you name some of the papers in which this person is first author?"
+  fields:
+    - publication.title_venue_year_link
+
+- id: non_first_author_papers
+  question: "Can you name papers in which this person is not first author?"
+  fields:
+    - publication.title_venue_year_link
+
+# Online profiles
+- id: orcid_profile
+  question: "What is the URL of this person's ORCID profile?"
+  fields:
+    - online_profile.orcid
+
+- id: google_scholar_profile
+  question: "Share the link to this person's Google Scholar profile."
+  fields:
+    - online_profile.google_scholar
+
+- id: arxiv_profile
+  question: "Provide the URL for this person's author page on arXiv."
+  fields:
+    - online_profile.arxiv
+
+- id: personal_website
+  question: "What is the URL to this person's personal website?"
+  fields:
+    - online_profile.personal_website
+
+- id: linkedin_profile
+  question: "Where can one find this person's LinkedIn profile online?"
+  fields:
+    - online_profile.linkedin_profile
+
+- id: github_profile
+  question: "Where can I find this person's GitHub profile?"
+  fields:
+    - online_profile.github
+
+- id: research_info_urls
+  question: "Where can I find information about this person's research?"
+  fields:
+    - online_profile.google_scholar
+    - online_profile.arxiv
+
+# Contact & service
+- id: contact_info
+  question: "Do you know any public contact information for this person?"
+  fields:
+    - contact_info.email
+    - contact_info.phone
+
+- id: awards
+  question: "What awards has this person received?"
+  fields:
+    - award.dli_fellowship
+    - award.research_grant
+
+- id: peer_reviewer_service
+  question: "For which conferences or journals has this person served as a peer reviewer?"
+  fields:
+    - service.peer_reviewer
+
+- id: invited_talks
+  question: "Has this person been invited as a speaker to academic events?"
+  fields:
+    - invited_talk.arxiv_accessibility_forum
+    - invited_talk.xr_access_symposium
+
+# Skills & expertise
+- id: ux_methods
+  question: "What UX research methods does this person have experience with?"
+  fields:
+    - specialized_skill.ux_research_methods
+
+- id: programming_languages
+  question: "Which programming languages does this person have experience with?"
+  fields:
+    - specialized_skill.backend_development
+    - specialized_skill.frontend_development
+    - specialized_skill.mobile_development
+
+- id: domain_knowledge
+  question: "Mention domain knowledge areas this person possesses."
+  fields:
+    - specialized_skill.domain_knowledge
+
+- id: languages_spoken
+  question: "Which languages does this person speak?"
+  fields:
+    - language.spanish
+    - language.english
+    - language.chinese
