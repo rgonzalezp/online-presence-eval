@@ -54,15 +54,17 @@ def auto_fail_regex(ans: str) -> bool:
 
 
 # ────────────────────────────────────────────────────────── NLI  ──
-_tok = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+nli_model = "MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli"
+_tok = AutoTokenizer.from_pretrained(nli_model)
 _nli = AutoModelForSequenceClassification.from_pretrained(
-        "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli").eval()
+        nli_model).eval()
 
-def entails(premise: str, hyp: str, thr: float = .80) -> bool:
+def entails(premise: str, hyp: str, thr: float = .800) -> bool:
     pair = _tok(premise, hyp, return_tensors="pt", truncation=True)
     with torch.no_grad():
         probs = F.softmax(_nli(**pair).logits, dim=-1)
-    return probs[0,2].item() >= thr
+
+    return probs[0,0].item() >= thr
 
 
 # ─────────────────────────────────────────────── GPT-judge prompt ──
@@ -101,16 +103,13 @@ def evaluate(prompt_id: str, ans: str, prompts: dict,
     hyps   = [h for f in fields for h in hypos_by_field.get(f, [])]
     q_text = prompts[prompt_id]["question"]
 
-    errorDetection(ans)
-
-    return
     # 1) auto-fail
     if "auto" in stages and auto_fail_regex(ans):
         return "fail", "auto", "NEG+KEY"
 
     # 2) NLI
     if "nli" in stages and all(entails(ans, h) for h in hyps):
-        return "pass", "nli", json.dumps(hyps, ensure_ascii=False)
+        return "entails", "nli", json.dumps(hyps, ensure_ascii=False)
 
     # 3) LLM
     if "llm" in stages:

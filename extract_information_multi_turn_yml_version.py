@@ -220,10 +220,10 @@ def run_models(models, prompts_df, selection=None, histories=None):
                 'name_variant':     name_variant,
                 'prompt':           prompt,
                 'response':         text,
+                'refusal_label':    refusal_label,
+                'refusal_confidence': refusal_conf,
                 'metadata':         metadata,
                 'responseapi':      raw,
-                'refusal_label':    refusal_label,
-                'refusal_confidence': refusal_conf
             })
 
             print(f"Response: {text[:200]}{'...' if len(text) > 200 else ''}")
