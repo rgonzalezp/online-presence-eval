@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-evaluate.py – score model answers (interactive stages) and report
-the method + query used to decide each score.
-"""
 import json, yaml, re, argparse, pandas as pd, openai
 from pathlib import Path
 from openai import OpenAI
@@ -38,6 +33,16 @@ def load_prompts(path: str):
         plist = yaml.safe_load(f)
     return {p["id"]: p for p in plist}
 
+# ───────────────────────────────────────────────(This model doesn't work)─ error detection ──
+tokenizer_error = AutoTokenizer.from_pretrained("byviz/bylastic_classification_logs")
+model_error = AutoModelForSequenceClassification.from_pretrained("byviz/bylastic_classification_logs")
+
+def errorDetection(response)-> bool:
+    inputs = tokenizer_error(response, return_tensors="pt")
+    outputs = model_error(**inputs)
+    probabilities = torch.nn.functional.softmax(outputs.logits, dim=-1)
+    prediction = torch.argmax(probabilities, dim=-1)
+    return model_error.config.id2label[prediction.item()] != "INFO"
 
 # ────────────────────────────────────────────────────────── regex ──
 NEG     = re.compile(r"\b(no|not|never|formerly|previously|ex-|until)\b", re.I)
@@ -96,6 +101,9 @@ def evaluate(prompt_id: str, ans: str, prompts: dict,
     hyps   = [h for f in fields for h in hypos_by_field.get(f, [])]
     q_text = prompts[prompt_id]["question"]
 
+    errorDetection(ans)
+
+    return
     # 1) auto-fail
     if "auto" in stages and auto_fail_regex(ans):
         return "fail", "auto", "NEG+KEY"
