@@ -1,0 +1,101 @@
+{
+  "visual_identity": {
+    "profile_photo": [
+      "https://drive.google.com/file/d/1RStmGkltzDMppukz_7JTjFFlMICZzJ6g/view?usp=sharing",
+      "https://drive.google.com/file/d/1UKoTpYO-90_1Rg3-ofoD_awKrCMwDFmT/view?usp=sharing"
+    ]
+  },
+  "affiliation": {
+    "current_affiliation": [
+      "Cornell Tech",
+      "Cornell University"
+    ],
+    "past_affiliation": [
+      "Columbia University Visiting Researcher",
+      "Computer Systems Engineering undergraduate Universidad de Los Andes, Colombia"
+    ]
+  },
+  "identity": {
+    "country": [
+      "Spaniard",
+      "Colombian",
+      "Venezuelan"
+    ]
+  },
+  "education": {
+    "phd": "Cornell University, 2026",
+    "msc": "Cornell University, 2024",
+    "bachelor": "Universidad de Los Andes, Colombia, 2020"
+  },
+  "research_interest": {
+    "set_1": "Human-AI Interaction, Accessibility,Vision-Language Models, AI Visual Understanding, Visual Interpretation Systems",
+    "set_2": "VR and AR, Human-Computer Interaction, Interaction Design"
+  },
+  "online_profile": {
+    "orcid": "https://orcid.org/0000-0002-1344-3850",
+    "google_scholar": "https://scholar.google.com/citations?user=hCkREzAAAAAJ&hl=en",
+    "arxiv": "http://arxiv.org/a/gonzalez_r_2",
+    "personal_website": "https://rgonzalezp.github.io/",
+    "linkedin_profile": "https://www.linkedin.com/in/rickygonzalezpenuela/",
+    "github": "https://github.com/rgonzalezp"
+  },
+  "research_metric": {
+    "total_citations": "118",
+    "h_index": "7",
+    "i10_index": "3",
+    "top_paper": "Investigating use cases of ai-powered scene description applications for blind and low vision people",
+    "top_paper_citations": "28"
+  },
+  "publication": {
+    "title_venue_year_link": [
+      "Towards Understanding the Use of MLLM-Enabled Applications for Visual Interpretation by Blind and Low Vision People_CHI2025_2025_https://arxiv.org/abs/2503.05899",
+      "Accessible Nonverbal Cues to Support Conversations in VR for Blind and Low Vision People_ASSETS2024_2024_https://dl.acm.org/doi/abs/10.1145/3663548.3675663",
+      "(Anonymized ver.) Multimodal Spatial Interactions on Touchscreen Devices to Support Data Analysis for Blind and Low Vision People_IMWUT2025_2025",
+      "Why So Serious? Exploring Timely Humorous Comments in AAC Through AI-Powered Interfaces_CHI2025_2025",
+      "Investigating Use Cases of AI-Powered Scene Description Applications for Blind and Low Vision People_CHI2024_2024",
+      "Hands-On: Using Gestures to Control Descriptions of a Virtual Environment for People with Visual Impairments_UIST2022_2022",
+      "Uncovering Visually Impaired Gamers Preference for Spatial Awareness Tools Within Video Games_ASSETS2022_2022",
+      "Understanding How People with Visual Impairments Take Selfies: Experiences and Challenges_ASSETS2022poster_2022",
+      "Towards a Generalized Acoustic Minimap for Visually Impaired Gamers_UIST2021_2021",
+      "Molder: An Accessible Design Tool for Tactile Maps_CHI2020_2020",
+      "Tactiled: Towards More and Better Tactile Graphics Using Machine Learning_ASSETS2019_2019"
+    ]
+  },
+  "contact_info": {
+    "email": "reg258@cornell.edu",
+    "phone": "+1 646-889-4931"
+  },
+  "role": {
+    "current_position": "PhD Candidate in Information Science Human-Computer Interaction, AI, and Connective Media at Cornell Tech"
+  },
+  "award": {
+    "dli_fellowship": "Digital Life Initiative fellowship",
+    "research_grant": "Cohere for AI Research Grants (lead researcher)"
+  },
+  "specialized_skill": {
+    "ux_research_methods": "Diary Studies; Interview Studies; User Studies; Quantitative Methods; Qualitative Methods; Low-/High-Fidelity Prototyping",
+    "backend_development": "C# (Unity); Python; Java; JavaScript; TypeScript",
+    "frontend_development": "React; React Native; NodeJS; Django; Jekyll",
+    "mobile_development": "Swift; React Native",
+    "domain_knowledge": "Research operations; AI-assisted research operations; Human-Computer Interaction; Human-AI Interaction; Accessibility; iOS Accessibility; XRI; 3D Printing; Laser Cutting"
+  },
+  "language": {
+    "spanish": "Native",
+    "english": "Fluent",
+    "chinese": "Basic"
+  },
+  "work_experience": {
+    "research_intern_jpmc_2024": "Global Technologies Applied Research, JPMorgan Chase & Co (May - Aug 2024)",
+    "research_intern_jpmc_2023": "Global Technologies Applied Research, JPMorgan Chase & Co (Jun - Aug 2023)",
+    "visiting_researcher_columbia_2021": "Columbia University (May - Dec 2021)",
+    "full_stack_engineer_leal_2020": "Leal (Jan - Jun 2020)",
+    "research_intern_cornelltech_2019": "Cornell Tech (May - Sep 2019)"
+  },
+  "service": {
+    "peer_reviewer": "ACM CHI 2024, 2025; IEEE VIS 2024; ACM MobileHCI 2022; ACM TACCESS 2022"
+  },
+  "invited_talk": {
+    "arxiv_accessibility_forum": "What Role Can A.I. Play in Blind and Low Vision People's Day-To-Day Experience? panel, New York, NY (Sep 2024)",
+    "xr_access_symposium": "Designing Interactive AI Visual Guides for Blind and Low Vision People, New York, NY (Jun 2024)"
+  }
+}

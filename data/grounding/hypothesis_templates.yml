@@ -1,0 +1,31 @@
+# ── affiliation ─────────────────────────────────────────────
+affiliation.current_affiliation: "He is currently affiliated with {v}."
+affiliation.past_affiliation:    "He was previously affiliated with {v}."
+
+# ── identity / language ─────────────────────────────────────
+identity.country:  "His nationality includes {v}."
+language.*:        "His proficiency in {k} is {v}."
+
+# ── education ───────────────────────────────────────────────
+education.phd:      "He is pursuing a PhD at {v}."
+education.msc:      "He earned an MSc at {v}."
+education.bachelor: "He earned a bachelor's degree at {v}."
+
+# ── online profiles (scalar URLs) ───────────────────────────
+online_profile.*: "His {k} profile is {v}."
+
+# ── research metrics ────────────────────────────────────────
+research_metric.total_citations: "His total citation count is {v}."
+research_metric.h_index:         "His h-index is {v}."
+research_metric.i10_index:       "His i10-index is {v}."
+research_metric.top_paper:       "His most cited paper is titled {v} ."
+
+# ── publications (compound string) ──────────────────────────
+publication.title_venue_year_link: >
+  He authored {title} presented at {venue} in {year}.
+
+# ── awards, work experience, invited talks, etc. ────────────
+award.*:            "He received the {v}."
+work_experience.*:  "He worked at {v}."
+invited_talk.*:     "He gave an invited talk: {v}."
+service.peer_reviewer: "He served as a peer reviewer for {v}."

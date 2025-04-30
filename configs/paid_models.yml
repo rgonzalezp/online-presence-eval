@@ -11,9 +11,9 @@ models:
     provider: perplexity
     model: sonar
 
-  - name: deepseekv3
+  - name: qwenv3
     provider: openrouter
-    model: deepseek/deepseek-chat-v3-0324:free
+    model: qwen/qwen3-30b-a3b:free
 
   - name: claude
     provider: anthropic

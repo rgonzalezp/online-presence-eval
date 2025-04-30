@@ -1,0 +1,178 @@
+[
+  {
+    "field": "affiliation.current_affiliation",
+    "hypothesis": "He is currently affiliated with Cornell Tech."
+  },
+  {
+    "field": "affiliation.current_affiliation",
+    "hypothesis": "He is currently affiliated with Cornell University."
+  },
+  {
+    "field": "affiliation.past_affiliation",
+    "hypothesis": "He was previously affiliated with Columbia University Visiting Researcher."
+  },
+  {
+    "field": "affiliation.past_affiliation",
+    "hypothesis": "He was previously affiliated with Computer Systems Engineering undergraduate Universidad de Los Andes, Colombia."
+  },
+  {
+    "field": "identity.country",
+    "hypothesis": "His nationality includes Spaniard."
+  },
+  {
+    "field": "identity.country",
+    "hypothesis": "His nationality includes Colombian."
+  },
+  {
+    "field": "identity.country",
+    "hypothesis": "His nationality includes Venezuelan."
+  },
+  {
+    "field": "education.phd",
+    "hypothesis": "He is pursuing a PhD at Cornell University, 2026."
+  },
+  {
+    "field": "education.msc",
+    "hypothesis": "He earned an MSc at Cornell University, 2024."
+  },
+  {
+    "field": "education.bachelor",
+    "hypothesis": "He earned a bachelor's degree at Universidad de Los Andes, Colombia, 2020."
+  },
+  {
+    "field": "online_profile.orcid",
+    "hypothesis": "His orcid profile is https://orcid.org/0000-0002-1344-3850."
+  },
+  {
+    "field": "online_profile.google_scholar",
+    "hypothesis": "His google scholar profile is https://scholar.google.com/citations?user=hCkREzAAAAAJ&hl=en."
+  },
+  {
+    "field": "online_profile.arxiv",
+    "hypothesis": "His arxiv profile is http://arxiv.org/a/gonzalez_r_2."
+  },
+  {
+    "field": "online_profile.personal_website",
+    "hypothesis": "His personal website profile is https://rgonzalezp.github.io/."
+  },
+  {
+    "field": "online_profile.linkedin_profile",
+    "hypothesis": "His linkedin profile profile is https://www.linkedin.com/in/rickygonzalezpenuela/."
+  },
+  {
+    "field": "online_profile.github",
+    "hypothesis": "His github profile is https://github.com/rgonzalezp."
+  },
+  {
+    "field": "research_metric.total_citations",
+    "hypothesis": "His total citation count is 118."
+  },
+  {
+    "field": "research_metric.h_index",
+    "hypothesis": "His h-index is 7."
+  },
+  {
+    "field": "research_metric.i10_index",
+    "hypothesis": "His i10-index is 3."
+  },
+  {
+    "field": "research_metric.top_paper",
+    "hypothesis": "His most cited paper is titled Investigating use cases of ai-powered scene description applications for blind and low vision people ."
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Towards Understanding the Use of MLLM-Enabled Applications for Visual Interpretation by Blind and Low Vision People presented at CHI2025 in 2025.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Accessible Nonverbal Cues to Support Conversations in VR for Blind and Low Vision People presented at ASSETS2024 in 2024.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored (Anonymized ver.) Multimodal Spatial Interactions on Touchscreen Devices to Support Data Analysis for Blind and Low Vision People presented at IMWUT2025 in 2025.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Why So Serious? Exploring Timely Humorous Comments in AAC Through AI-Powered Interfaces presented at CHI2025 in 2025.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Investigating Use Cases of AI-Powered Scene Description Applications for Blind and Low Vision People presented at CHI2024 in 2024.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Hands-On: Using Gestures to Control Descriptions of a Virtual Environment for People with Visual Impairments presented at UIST2022 in 2022.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Uncovering Visually Impaired Gamers Preference for Spatial Awareness Tools Within Video Games presented at ASSETS2022 in 2022.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Understanding How People with Visual Impairments Take Selfies: Experiences and Challenges presented at ASSETS2022poster in 2022.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Towards a Generalized Acoustic Minimap for Visually Impaired Gamers presented at UIST2021 in 2021.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Molder: An Accessible Design Tool for Tactile Maps presented at CHI2020 in 2020.\n"
+  },
+  {
+    "field": "publication.title_venue_year_link",
+    "hypothesis": "He authored Tactiled: Towards More and Better Tactile Graphics Using Machine Learning presented at ASSETS2019 in 2019.\n"
+  },
+  {
+    "field": "award.dli_fellowship",
+    "hypothesis": "He received the Digital Life Initiative fellowship."
+  },
+  {
+    "field": "award.research_grant",
+    "hypothesis": "He received the Cohere for AI Research Grants (lead researcher)."
+  },
+  {
+    "field": "language.spanish",
+    "hypothesis": "His proficiency in spanish is Native."
+  },
+  {
+    "field": "language.english",
+    "hypothesis": "His proficiency in english is Fluent."
+  },
+  {
+    "field": "language.chinese",
+    "hypothesis": "His proficiency in chinese is Basic."
+  },
+  {
+    "field": "work_experience.research_intern_jpmc_2024",
+    "hypothesis": "He worked at Global Technologies Applied Research, JPMorgan Chase & Co (May - Aug 2024)."
+  },
+  {
+    "field": "work_experience.research_intern_jpmc_2023",
+    "hypothesis": "He worked at Global Technologies Applied Research, JPMorgan Chase & Co (Jun - Aug 2023)."
+  },
+  {
+    "field": "work_experience.visiting_researcher_columbia_2021",
+    "hypothesis": "He worked at Columbia University (May - Dec 2021)."
+  },
+  {
+    "field": "work_experience.full_stack_engineer_leal_2020",
+    "hypothesis": "He worked at Leal (Jan - Jun 2020)."
+  },
+  {
+    "field": "work_experience.research_intern_cornelltech_2019",
+    "hypothesis": "He worked at Cornell Tech (May - Sep 2019)."
+  },
+  {
+    "field": "service.peer_reviewer",
+    "hypothesis": "He served as a peer reviewer for ACM CHI 2024, 2025; IEEE VIS 2024; ACM MobileHCI 2022; ACM TACCESS 2022."
+  },
+  {
+    "field": "invited_talk.arxiv_accessibility_forum",
+    "hypothesis": "He gave an invited talk: What Role Can A.I. Play in Blind and Low Vision People's Day-To-Day Experience? panel, New York, NY (Sep 2024)."
+  },
+  {
+    "field": "invited_talk.xr_access_symposium",
+    "hypothesis": "He gave an invited talk: Designing Interactive AI Visual Guides for Blind and Low Vision People, New York, NY (Jun 2024)."
+  }
+]
