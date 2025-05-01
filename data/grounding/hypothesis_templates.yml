@@ -29,3 +29,5 @@ award.*:            "He received the {v}."
 work_experience.*:  "He worked at {v}."
 invited_talk.*:     "He gave an invited talk: {v}."
 service.peer_reviewer: "He served as a peer reviewer for {v}."
+
+#Visual identity was missing

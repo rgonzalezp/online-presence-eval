@@ -1,5 +1,9 @@
 [
   {
+    "field": "visual_identity.profile_photo",
+    "hypothesis": "You can find how we looks like at https://rgonzalezp.github.io/"
+  },
+  {
     "field": "affiliation.current_affiliation",
     "hypothesis": "He is currently affiliated with Cornell Tech."
   },

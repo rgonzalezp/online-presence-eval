@@ -38,7 +38,7 @@ def load_run_csv(path: str):
     return df.to_dict(orient="records")
 
 
-def load_hypos(path: str):
+def load_hypos(path: str ):
     by_field = {}
     with open(path, encoding="utf-8") as f:
         for e in json.load(f):
@@ -46,7 +46,7 @@ def load_hypos(path: str):
     return by_field
 
 
-def load_prompts(path: str):
+def load_prompts(path: str = "data/grounding/ultra_specific_prompts_mapping.yml"):
     with open(path, encoding="utf-8") as f:
         plist = yaml.safe_load(f)
     return {p["id"]: p for p in plist}
@@ -63,6 +63,8 @@ def errorDetection(response)-> bool:
     return model_error.config.id2label[prediction.item()] != "INFO"
 
 # ────────────────────────────────────────────────────────── regex ──
+
+## Auto fail regex is crap it only works for one case (affiliation, and it is not well implemented)
 NEG     = re.compile(r"\b(no|not|never|formerly|previously|ex-|until)\b", re.I)
 KEY_ENT = re.compile(r"\bcornell (university|tech)\b", re.I)
 
@@ -143,19 +145,20 @@ def select_stages() -> set[str]:
     menu = """
 Choose evaluation stages (comma-separated numbers or 'all'):
 
-  [1] auto-fail regex
+  [1] auto-fail regex (disabled)
   [2] NLI entailment
   [3] LLM judge
 
 Selection (default = all): """
     raw = input(menu).strip().lower()
     if raw in {"", "all"}:
-        return {"auto", "nli", "llm"}
-    mapping = {"1": "auto", "2": "nli", "3": "llm"}
+        #return {"auto", "nli", "llm"}
+        return {"nli", "llm"}
+    mapping = { "2": "nli", "3": "llm"}
     stages = {mapping[x] for x in raw.replace(",", " ").split() if x in mapping}
     if not stages:
         print("⚠️  Invalid choice – using all stages.")
-        stages = {"auto", "nli", "llm"}
+        stages = {"nli", "llm"}
     return stages
 
 
@@ -163,15 +166,18 @@ Selection (default = all): """
 def main():
     cli = argparse.ArgumentParser(description="Score answers and tag method/query")
     cli.add_argument("--answers", required=True)
-    cli.add_argument("--hypos",   required=True)
-    cli.add_argument("--prompts", required=True)
+    cli.add_argument("--hypos",   required=False)
+    cli.add_argument("--prompts", required=False)
     cli.add_argument("--out")
     args = cli.parse_args()
 
+
+    
+
     stages  = select_stages()
     rows    = load_run_csv(args.answers)
-    hypos   = load_hypos(args.hypos)
-    prompts = load_prompts(args.prompts)
+    hypos   = load_hypos(args.hypos or "data/grounding/ricardo_hypotheses.json")
+    prompts = load_prompts(args.prompts or "data/grounding/ultra_specific_prompts_mapping.yml")
 
     cfgs = load_model_configs()
     models = create_models(cfgs)
