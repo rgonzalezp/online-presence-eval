@@ -1,5 +1,5 @@
 from models import create_models
-from extract_information_multi_turn import (
+from toy_examples.extract_information_multi_turn import (
     load_prompts,
     load_model_configs,
     run_models,

@@ -3,10 +3,13 @@ from openai import OpenAI
 import anthropic
 from google import genai
 from google.genai.types import Content, Part, Tool, GenerateContentConfig, GoogleSearch
+from google.genai import errors
 import requests
 import yaml
 from pathlib import Path
 from typing import Union, List, Dict, Tuple
+import time, threading
+from collections import deque
 
 
 def load_api_keys():
@@ -25,8 +28,46 @@ API_KEYS = load_api_keys()
 
 # Base interface
 class BaseModel:
+
+    _LOCK          = threading.Lock()
+    _WINDOWS       = {}   
+    _RATE_LIMITS   = {}
+
+
+    @classmethod
+    def set_rate_limit(cls, model_name: str, rpm: int):
+        """Register or update a requests-per-minute limit for a model slug."""
+        with cls._LOCK:
+            cls._RATE_LIMITS[model_name] = rpm
+            cls._WINDOWS.setdefault(model_name, deque())
+
     def __init__(self, name: str):
         self.name = name
+        BaseModel.set_rate_limit(self.name, BaseModel._RATE_LIMITS.get(self.name, 10))
+
+    def _block_if_needed(self):
+        """
+        Ensure this model stays below its RPM.
+        Called immediately before every network request.
+        """
+        rpm   = BaseModel._RATE_LIMITS[self.name]
+        win   = BaseModel._WINDOWS[self.name]
+        now   = time.time()
+
+        # drop timestamps older than 60 s
+        while win and now - win[0] >= 60:
+            win.popleft()
+
+        if len(win) >= rpm:
+            sleep_for = 60 - (now - win[0]) + 0.01  # small buffer
+            print(f"[{self.name}] ⏳  rate limit reached. Sleeping {sleep_for:.1f}s")
+            time.sleep(sleep_for)
+            # after sleep, purge again
+            now = time.time()
+            while win and now - win[0] >= 60:
+                win.popleft()
+
+        win.append(now)
 
     def generate(
         self,
@@ -38,6 +79,9 @@ class BaseModel:
         Normalize to a messages list, call _call_model, then append the assistant response.
         Returns: text, metadata, raw_response, updated_messages
         """
+
+        self._block_if_needed()
+
         # Normalize input
         if isinstance(prompt_or_messages, str):
             messages: List[Dict[str, str]] = [{"role": "user", "content": prompt_or_messages}]
@@ -88,13 +132,17 @@ class OpenAIModel(BaseModel):
 
         ## Alter prompt with extra content for starter prompt for testing
         #params["input"][0]['content'] = params["input"][0]['content'] + "from Cornell University" 
-        ## Check information being sent.
-        print(params)
-        response = client.responses.create(**params)
-        # extract output text and metadata
-        text = response.output_text
-        metadata = getattr(response, "output", {})
-        return text, metadata, response
+
+        try:
+            resp = client.responses.create(**params)
+        except Exception as e:
+            return f"[ERROR] OpenAI request failed ({e})", {}, {}
+        text = getattr(resp, "output_text", None)
+        if not text:
+            return "[ERROR] Empty response from OpenAI", {}, resp.__dict__
+
+        metadata = getattr(resp, "output", {})
+        return text.strip(), metadata, resp
 
 class AnthropicModel(BaseModel):
     def __init__(self, name, model):
@@ -166,25 +214,47 @@ class GeminiModel(BaseModel):
                  print("ERROR: Cannot find 'Content' or 'Part' in 'google.genai.types'. "
                        "Ensure your import path and SDK are correct.")
                  # You might return an error or raise an exception here
-                 return "Error: SDK type mismatch", {}, None
+                 return "Error: SDK type mismatch", {}, {}
             except Exception as e:
                  print(f"Error creating Content/Part object: {e}")
-                 return f"Error: SDK object creation failed ({e})", {}, None
+                 return f"Error: SDK object creation failed ({e})", {}, {}
             
         ## When Gemini does not have access to web search, it sticks to the conversation so far and it does not provide any information that is not available there. So for now we flag that it can always use web-search if it's asking follow-up questions. Will probably have to change this later to handle the availability of the tool or not in an easier way
         if mode == "web-search" or len(messages) > 1:
             tools = [Tool(google_search=GoogleSearch())]
-        response = self.client.models.generate_content(
-            model=self.model,
-            contents=content_objects,
-            config=GenerateContentConfig(
-                tools=tools,
-                response_modalities=["TEXT"],
-                max_output_tokens=1024,
-                temperature=0.1115
+        try:
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=content_objects,
+                config=GenerateContentConfig(
+                    tools=tools,
+                    response_modalities=["TEXT"],
+                    max_output_tokens=1024,
+                    temperature=0.1115
+                )
             )
-        )
-        text = "".join(part.text for part in response.candidates[0].content.parts)
+        except errors.APIError as e:
+            print(e.code) # 404
+            print(e.message)
+            
+        # ---------- sanity-check the response structure ---------------
+        if not getattr(response, "candidates", None):
+            return "[ERROR] Gemini returned no candidates", {}, response
+
+        cand = response.candidates[0]
+        if not getattr(cand, "content", None):
+            return "[ERROR] Candidate had no content", {}, response
+
+        parts = getattr(cand.content, "parts", None)
+        if not parts:
+            return "[ERROR] Candidate content.parts empty", {}, response
+
+        # gather text safely
+        text_chunks = [getattr(p, "text", "") for p in parts if getattr(p, "text", "")]
+        if not text_chunks:
+            return "[ERROR] No text parts in response", {}, response
+
+        text = "".join(text_chunks).strip()
         metadata = {}
         if hasattr(response.candidates[0], 'grounding_metadata') and hasattr(response.candidates[0].grounding_metadata, 'search_entry_point'):
             metadata['search_content'] = response.candidates
@@ -277,12 +347,14 @@ class OpenRouterModel(BaseModel):
             temperature=0.1115,
             max_tokens=1024,
         )
+        print(resp)
         text = resp.choices[0].message.content
         metadata = dict(
             usage=getattr(resp, "usage", {}),
             id=resp.id,
             provider="openrouter"
         )
+        
         return text, metadata, resp
 
 

@@ -3,7 +3,8 @@ from pathlib import Path
 from openai import OpenAI
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch, torch.nn.functional as F
-from models_multi import create_models 
+from extract_information_multi_turn_yml_version import select_models_to_run, load_model_configs
+from models_multi  import create_models 
 
 
 _JUDGE_MODELS = None            # type: dict[str, object]
@@ -86,7 +87,7 @@ def entails(premise: str, hyp: str, thr: float = .800) -> bool:
 
 # ─────────────────────────────────────────────── GPT-judge prompt ──
 def llm_judge(ans: str, hyps: list[str], q: str,
-              model_name: str = "qwenv3") -> tuple[str, str]:
+              selected_models: dict ) -> tuple[str, str]:
     """
     Use the unified wrapper in models_multi to grade with an arbitrary provider.
     Returns (one-word verdict, prompt_sent_to_llm).
@@ -103,16 +104,16 @@ Model’s answer:
 
 Respond with one word: PASS / FAIL / UNCERTAIN
 """.strip()
-
-    judge_model = _get_judge_model(model_name)
+    
+    judge_model = _get_judge_model(selected_models[0])
     text, _meta, _raw, _hist = judge_model.generate(prompt, mode="no-search")
     verdict = text.strip().split()[0].lower()        # keep first token
-    return verdict, prompt, model_name
+    return verdict, prompt, selected_models[0]
 
 
 # ────────────────────────────────────────────── evaluate answer ──
 def evaluate(prompt_id: str, ans: str, prompts: dict,
-             hypos_by_field: dict, stages: set[str]) -> tuple[str, str, str]:
+             hypos_by_field: dict, stages: set[str], selected_models: dict) -> tuple[str, str, str]:
     """
     Returns (score, method, query)
     """
@@ -130,7 +131,7 @@ def evaluate(prompt_id: str, ans: str, prompts: dict,
 
     # 3) LLM
     if "llm" in stages:
-        score, prompt, model_name = llm_judge(ans, hyps, q_text)
+        score, prompt, model_name = llm_judge(ans, hyps, q_text,selected_models)
         return score, "llm", prompt, model_name
 
     # unresolved
@@ -172,10 +173,14 @@ def main():
     hypos   = load_hypos(args.hypos)
     prompts = load_prompts(args.prompts)
 
+    cfgs = load_model_configs()
+    models = create_models(cfgs)
+    selected_models = select_models_to_run(models, None)
+
     for row in rows[1:]:  # skip header row if dataset re-included it
         score, method, qry, model_name = evaluate(row["prompt_id"],
                                       row["response"],
-                                      prompts, hypos, stages)
+                                      prompts, hypos, stages, selected_models)
         row["score"]        = score
         row["judge_method"] = method
         row["judge_query"]  = qry

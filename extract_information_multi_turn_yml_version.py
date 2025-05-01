@@ -2,7 +2,7 @@ import pandas as pd
 import yaml
 import sys
 from datetime import datetime
-from models_multi import create_models
+from models_multi import create_models,BaseModel
 from utils.api_logger import log_api_call
 from utils.refusal_detector import detect_refusal, _MODEL as _REFUSAL_MODEL
 import os
@@ -196,9 +196,12 @@ def run_models(models, prompts_df, selection=None, histories=None):
             try:
                 text, metadata, raw, new_hist = model.generate(messages, mode)
             except Exception as e:
-                text, metadata, raw, new_hist = f"[ERROR] {e}", {}, {}, None
+                text = f"[ERROR] {e}"
+                metadata, raw = {}, {}
+                new_hist = messages + [{"role": "assistant", "content": text}]
 
-            histories[name] = new_hist
+            if new_hist is not None:
+                histories[name] = new_hist
 
             # refusal detection
             refusal_label, refusal_conf = detect_refusal(user_query=prompt, text_response=text)
@@ -248,6 +251,10 @@ def main(model_selection=None, prompt_selection=None):
     starter_df = load_starter_prompts()
     cfgs = load_model_configs()
     models = create_models(cfgs)
+
+    BaseModel.set_rate_limit("qwenv3",     20)
+    BaseModel.set_rate_limit("gemini-2.5-flash", 10)
+   
     starter_results, histories = run_models(models, starter_df, model_selection)
     # filter non-refusers
     non_refusers = {r['model'] for r in starter_results if r['refusal_label']=='Non-refusal'}
