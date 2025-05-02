@@ -170,7 +170,7 @@ def run_models(models, prompts_df, selection=None, histories=None):
             prompt_id    = row['id']
             prompt       = row['question']
             is_detailed  = False
-            mode         = 'no-search'
+            mode         = 'web-search'
             job_variant  = name_variant = ''
             print(f"\n=== Follow-up Prompt: {prompt} (id={prompt_id}) ===")
         else:                                                # starter (DataFrame row)

@@ -3,9 +3,9 @@ models:
     provider: openai
     model: gpt-4.1
 
-  - name: gemini-2.5-flash
+  - name: gemini-2.0-flash
     provider: gemini
-    model: gemini-2.5-flash-preview-04-17
+    model: gemini-2.0-flash
 
   - name: perplexity-sonar
     provider: perplexity
@@ -14,7 +14,15 @@ models:
   - name: qwenv3
     provider: openrouter
     model: qwen/qwen3-30b-a3b:free
+  
+  - name: gemini-2.5-flash
+    provider: gemini
+    model: gemini-2.5-flash-preview-04-17
 
+  - name: gemini-2.5-pro
+    provider: gemini
+    model: gemini-2.5-pro-exp-03-25
+    
   - name: claude
     provider: anthropic
     model: claude-3-5-haiku-20241022

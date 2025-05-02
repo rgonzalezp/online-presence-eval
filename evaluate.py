@@ -112,6 +112,43 @@ Respond with one word: PASS / FAIL / UNCERTAIN
     verdict = text.strip().split()[0].lower()        # keep first token
     return verdict, prompt, selected_models[0]
 
+def llm_judge2(ans: str, hyps: list[str], q: str,
+              selected_models: dict ) -> tuple[str, str]:
+    """
+    Use the unified wrapper in models_multi to grade with an arbitrary provider.
+    Returns (one-word verdict, prompt_sent_to_llm).
+    """
+    prompt = f"""
+You are comparing a submitted answer to a set of ground-truths claims. Here is the data:
+
+[BEGIN DATA]
+************
+[Question]:\"{q}\"
+************
+[Ground-truth claims]:
+{json.dumps(hyps, ensure_ascii=False, indent=2)}
+************
+[Submission]:\"{ans}\"
+************
+[END DATA]
+
+Compare the factual content of the submitted answer with the expert answer. Ignore any differences in style, grammar, or punctuation.
+The submitted answer may either be a subset or superset of the expert answer, or it may conflict with it. Determine which case applies. Answer the question by selecting one of the following options:
+(A) The submitted answer is a subset of the expert answer and is fully consistent with it.
+(B) The submitted answer is a superset of the expert answer and is fully consistent with it.
+(C) The submitted answer contains all the same details as the expert answer.
+(D) There is a disagreement between the submitted answer and the expert answer.
+(E) The answers differ, but these differences don't matter from the perspective of factuality.
+
+Answer the question with your reasoning in a step-by-step matter to be
+sure that your conclusion is correct. Avoid simply stating the correct answer at the outset. Select a
+single choice from A, B, C, D, or E. Mark the answer like this: ****(A, B, C, D, or E)****
+""".strip()
+    
+    judge_model = _get_judge_model(selected_models[0])
+    text, _meta, _raw, _hist = judge_model.generate(prompt, mode="no-search")
+    verdict = text       # keep first token
+    return verdict, prompt, selected_models[0]
 
 # ────────────────────────────────────────────── evaluate answer ──
 def evaluate(prompt_id: str, ans: str, prompts: dict,
@@ -133,7 +170,7 @@ def evaluate(prompt_id: str, ans: str, prompts: dict,
 
     # 3) LLM
     if "llm" in stages:
-        score, prompt, model_name = llm_judge(ans, hyps, q_text,selected_models)
+        score, prompt, model_name = llm_judge2(ans, hyps, q_text,selected_models)
         return score, "llm", prompt, model_name
 
     # unresolved

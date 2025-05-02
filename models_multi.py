@@ -121,7 +121,7 @@ class OpenAIModel(BaseModel):
             "model": self.model,
             # `input` accepts a list of message dicts for multi-turn
             "input": messages,
-            "temperature": 0.1115,
+            "temperature": 0,
             "user": "1",
             "max_output_tokens": 1024
         }
@@ -160,7 +160,7 @@ class AnthropicModel(BaseModel):
             model=self.model,
             messages=messages,
             max_tokens=1024,
-            temperature=0.1115
+            temperature=0
         )
         metadata = {
             "model":     getattr(resp, "model", None),
@@ -229,8 +229,8 @@ class GeminiModel(BaseModel):
                 config=GenerateContentConfig(
                     tools=tools,
                     response_modalities=["TEXT"],
-                    max_output_tokens=1024,
-                    temperature=0.1115
+                    max_output_tokens=8000,
+                    temperature=0,
                 )
             )
         except errors.APIError as e:
@@ -278,7 +278,7 @@ class GrokModel(BaseModel):
         kwargs = {
             "model":       self.model,
             "messages":    messages,        # full chat history
-            "temperature": 0.1115,
+            "temperature": 0,
             "max_tokens":  1024,
         }
         # (Grok doesn’t expose web-search yet; add tool args here when it does)
@@ -344,7 +344,7 @@ class OpenRouterModel(BaseModel):
         resp = self.client.chat.completions.create(
             model= model_name,          
             messages=messages,
-            temperature=0.1115,
+            temperature=0,
             max_tokens=1024,
         )
         print(resp)
